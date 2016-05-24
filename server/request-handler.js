@@ -23,12 +23,39 @@ var requestHandler = function(request, response) {
   // Documentation for both request and response can be found in the HTTP section at
   // http://nodejs.org/documentation/api/
 
+  // See the note below about CORS headers.
+  var headers = defaultCorsHeaders;
+  // 
+  var method = request.method;
+  //
+  var url = request.url;
+  // Array container to collect chunks
+  var body = [];
+
+  
+  // The stream starts with a 'data' event. When we hear it run anon func.
+  request.on('data', function(chunk) {
+    console.log("chunk", chunk);
+
+    // INVESTIGATE THIS LINE FOR GOOD STUFF - DON"T USE FS, eva
+    // fs.readFile(chunk, 'utf8', function(err, data){
+    //   console.log("data", data);
+    // });
+
+    // Add each chunk to our array container
+    body.push(chunk);
+  // When stream finishes it will emit an end event
+  }).on('end', function() {
+    // Concatenate and stringify together all of the chunks we've collected
+    body = Buffer.concat(body).toString();
+  });
+
   // Do some basic logging.
   //
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log("Serving request type " + request.method + " for url " + request.url);
+  console.log("Serving request type " + method + " for url " + url);
 
   // The outgoing status options:
   var statusCodePass = 200;
@@ -36,24 +63,32 @@ var requestHandler = function(request, response) {
   var statusCodeFail = 404;
   var statusCode500 = 500;
 
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
-
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = "text/plain";
+  // headers['Content-Type'] = "text/plain";
 
   // NOTE: Once this is properly talking to our app we'll likely have to change this to
   // the below:
-  // headers['Content-Type'] = "application/json"; 
+  headers['Content-Type'] = "application/json"; 
 
-  // save the object to return(right word?) (we'll stringify it first)
-   var obj = {
-    // "Hello World":"hello",
-    "results": []
+  var responseBody = {
+    headers: headers,
+    method: method,
+    url: url,
+    body: body,
+    results: []
   };
+  // console.log("---------------");
+  // console.log("responseBody", responseBody);
+  // console.log("body", body);
+  // save the object to return(right word?) (we'll stringify it first)
+  //  var obj = {
+  //   // "Hello World":"hello",
+  //   "results": []
+  // };
+
 
   // Check if it's a GET request
   if (request.method === 'GET') {
@@ -69,13 +104,22 @@ var requestHandler = function(request, response) {
   // up in the browser.
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-    response.end(JSON.stringify(obj));
+    // response.end(JSON.stringify(obj));
+    response.end(JSON.stringify(responseBody));
   }
   // Check if it's a GET request
-  else if (request.method === 'POST') {
+  // else if (request.method === 'POST') {
+  else if (method === 'POST') {
+    console.log("testing");
+    // console.log("request.json", request.json);
+    // request.json = object with username and message being posted
+    // obj.results.push(request.json);
+    // responseBody.results.push(request.json);
+
     // If so, have it send the 'created' HTTP code (201) and end() the stringified object
     response.writeHead(statusCodeCreated, headers);
-    response.end(JSON.stringify(obj));
+    // response.end(JSON.stringify(obj));
+    response.end(JSON.stringify(responseBody));
   }
 
 };
