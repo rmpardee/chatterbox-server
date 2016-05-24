@@ -1,6 +1,11 @@
+// var server = require('../server/basic-server.js');
+// console.log('server.serverUrl', server.serverUrl);
+
 // YOUR CODE HERE:
 var app = {};
-app.server = 'https://api.parse.com/1/classes/chatterbox';
+// app.server = 'https://api.parse.com/1/classes/chatterbox';
+app.server = 'http://127.0.0.1:3000';
+// app.server = server.serverUrl;
 //does nothing so far
 app.init = function  () {
   //add click functionality to username to add as friend
@@ -11,10 +16,11 @@ app.init = function  () {
 
 //send uses POST to send a message in a string
 app.send = function  (message) {
+  console.log('send is running');
   //use jQuery ajax to POST to parse server
   $.ajax({
     // This is the url you should use to communicate with the parse API server.
-    url: 'https://api.parse.com/1/classes/chatterbox',
+    url: app.server,
     //type
     type: 'POST',
     //this is the message passed in a a parameter turned to a "JSON?" string
@@ -23,6 +29,7 @@ app.send = function  (message) {
     contentType: 'application/json',
     //success function
     success: function (data) {
+      console.log('data', data);
       console.log('chatterbox: Message sent');
       },
     //error function
@@ -53,7 +60,7 @@ app.fetch = function () {
   // });
 
   // VERSION USING JQUERY'S .GET
-  $.get('https://api.parse.com/1/classes/chatterbox', 'order=-createdAt', function(data) {
+  $.get(app.server/*, 'order=-createdAt'*/, function(data) {
     app.clearMessages();
     for (var i = 0; i < data.results.length; i++) {
       app.addMessage(data.results[i]);
