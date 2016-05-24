@@ -13,6 +13,7 @@ app.init = function  () {
   $('#send').on('submit', app.handleSubmit);
   app.refresh();
 };
+//asdf
 
 //send uses POST to send a message in a string
 app.send = function  (message) {
